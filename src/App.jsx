@@ -133,8 +133,11 @@ class App2 extends Component{
     </div>)
   }
 }
-function App() {
-  const [count, setCount] = useState(0)
+function App(props) {
+  const [count, setCount] = useState(() => {
+    console.log('延长初始化，只执行一次');
+    return props.defaultCount||0
+  })
   return (
     <div>
       <button
