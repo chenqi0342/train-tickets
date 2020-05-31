@@ -1,4 +1,4 @@
-import React, { Component, createContext,lazy,Suspense,PureComponent,memo,useState} from 'react';
+import React, { Component, createContext,lazy,Suspense,PureComponent,memo,useState,useEffect,useContext} from 'react';
 // const MyContext = createContext()
 // //()传入默认值的作用是consumer找不到provider
 // const YouContext = createContext()
@@ -122,27 +122,116 @@ import React, { Component, createContext,lazy,Suspense,PureComponent,memo,useSta
 //   }
 // }
 
-class App2 extends Component{
-  state={count:0}
+// class App2 extends Component{
+//   state = {
+//     count: 0,
+//     size: {
+//       width: document.documentElement.clientWidth,
+//       height:document.documentElement.clientHeight,
+//     }
+//   }
+//   onResize = () => {
+//     this.setState({
+//       size: {
+//         width: document.documentElement.clientWidth,
+//         height:document.documentElement.clientHeight,
+//       }
+//     })
+//   }
+//   componentDidMount() {
+//     document.title = this.state.count
+//     window.addEventListener('resize',this.onResize,false)
+//   }
+//   componentWillUnmount() {
+//     window.removeEventListener('resize',this.onResize,false)
+//   }
+//   componentDidUpdate() {
+//     document.title=this.state.count
+//   }
+//   render() {
+//     const {count,size}=this.state
+//     return (<div>
+//       <button
+//         onClick={()=>{this.setState({count:this.state.count+1})}}
+//       >click({count})
+//       size:{size.height}x{size.width}
+//       </button>
+//     </div>)
+//   }
+// }
+// function App(props) {
+//   const [count, setCount] = useState(0)
+//   //   () => {
+//   //   // console.log('延长初始化，只执行一次');
+//   //   // return props.defaultCount||0
+//   // })
+//   const [size,setSize]=useState({
+//     width: document.documentElement.clientWidth,
+//     height:document.documentElement.clientHeight,
+//   })
+//   const onResize = () => {
+//     setSize({width: document.documentElement.clientWidth,
+//             height:document.documentElement.clientHeight,})
+//   }
+//   useEffect(() => {
+//     document.title = count;
+//   })
+//   useEffect(() => {
+//     window.addEventListener('resize', onResize, false)
+//     return () => {
+//       window.removeEventListener('resize', onResize, false)
+//     }
+//   }, [])
+//   //保证只能渲染一次，加一个参数，如何每次不同，useeffect就会渲染多次，加空数组每次相同，就会渲染一次，componentDidmount
+//   //回调函数,componentWillUmount
+//   return (
+//     <div>
+//       <button
+//         onClick={()=>setCount(count+1)}
+//       >click({count})
+//         {size.height}x{size.width}
+//       </button>
+//     </div>
+//   )
+// }
+//子组件要求是函数
+const CountContext = createContext()
+class Foo extends Component{
   render() {
-    const {count}=this.state
-    return (<div>
-      <button
-        onClick={()=>{this.setState({count:this.state.count+1})}}
-      >click({count})</button>
-    </div>)
+    return (
+      <CountContext.Consumer>
+        {count => <h1>{count}</h1>}
+      </CountContext.Consumer>
+    )
   }
 }
-function App(props) {
-  const [count, setCount] = useState(() => {
-    console.log('延长初始化，只执行一次');
-    return props.defaultCount||0
-  })
+class Bar extends Component{
+  static contextType=CountContext
+  render() {
+    const count=this.context
+    return (
+        <h1>{count}</h1>
+    )
+  }
+}
+function Counter() {
+  const count = useContext(CountContext);
+  return (
+    <h1>{count}</h1>
+)
+}
+function App() {
+  const [count, setCount] = useState(0)
   return (
     <div>
-      <button
-        onClick={()=>setCount(count+1)}
-      >click({count})</button>
+    <button
+      onClick={() =>{setCount(count+1)}}
+    >click({count})</button>
+      <CountContext.Provider value={count}>
+        <Foo />
+        <Bar />
+        <Counter/>
+      </CountContext.Provider>
     </div>
   )
 }
